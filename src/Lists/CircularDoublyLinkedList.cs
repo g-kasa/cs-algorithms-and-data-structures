@@ -6,15 +6,15 @@ namespace Algorithms.Lists;
 /// A circular doubly-linked list backed by a sentinel head node that keeps the ring
 /// permanently intact, eliminating null checks in all structural operations.
 /// </summary>
-/// <typeparam name="T">The element type; must implement <see cref="IComparable{T}"/> to support ordering operations.</typeparam>
+/// <typeparam name="T">The element type; must be non-nullable.</typeparam>
 /// <remarks>
 /// Time:  AddFirst O(1), AddLast O(1), RemoveFirst O(1), RemoveLast O(1),
 ///        Remove O(n), Contains O(n), Rotate O(steps mod n).
 /// Space: O(n) for n elements; O(1) auxiliary for all operations.
 /// </remarks>
-public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComparable<T>
+public class CircularDoublyLinkedList<T> : IEnumerable<T> where T : notnull
 {
-    private sealed class Node(T value)
+    protected sealed class Node(T value)
     {
         internal T Value = value;
         internal Node Next = null!;
@@ -23,10 +23,10 @@ public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComp
 
     // The sentinel is never yielded to callers. Its Value is irrelevant;
     // default(T)! suppresses the nullable warning without a real allocation concern.
-    private readonly Node _sentinel = new(default(T)!);
+    protected readonly Node _sentinel = new(default(T)!);
 
     /// <summary>Gets the number of elements in the list.</summary>
-    public int Count { get; private set; }
+    public int Count { get; protected set; }
 
     /// <summary>Initializes an empty list, wiring the sentinel to itself to form a valid empty ring.</summary>
     public CircularDoublyLinkedList()
@@ -37,7 +37,7 @@ public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComp
 
     // Rewires four pointers to place `node` immediately after `anchor` in the ring.
     // Does not touch Count — callers that deal with real elements manage Count themselves.
-    private static void LinkAfter(Node anchor, Node node)
+    protected static void LinkAfter(Node anchor, Node node)
     {
         node.Next = anchor.Next;
         node.Prev = anchor;
@@ -47,14 +47,14 @@ public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComp
 
     // Rewires two pointers to remove `node` from the ring.
     // Does not touch Count — callers that deal with real elements manage Count themselves.
-    private static void Unlink(Node node)
+    protected static void Unlink(Node node)
     {
         node.Prev.Next = node.Next;
         node.Next.Prev = node.Prev;
     }
 
     // Inserts a real element node immediately after anchor and increments Count.
-    private void InsertAfter(Node anchor, Node node)
+    protected void InsertAfter(Node anchor, Node node)
     {
         LinkAfter(anchor, node);
         Count++;
@@ -62,7 +62,7 @@ public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComp
 
     // Removes a real element node from the ring and decrements Count.
     // The caller guarantees node is never the sentinel.
-    private void Splice(Node node)
+    protected void Splice(Node node)
     {
         Unlink(node);
         Count--;
@@ -108,7 +108,7 @@ public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComp
         var current = _sentinel.Next;
         while (current != _sentinel)
         {
-            if (current.Value.CompareTo(value) == 0)
+            if (EqualityComparer<T>.Default.Equals(current.Value, value))
             {
                 Splice(current);
                 return true;
@@ -125,7 +125,7 @@ public sealed class CircularDoublyLinkedList<T> : IEnumerable<T> where T : IComp
         var current = _sentinel.Next;
         while (current != _sentinel)
         {
-            if (current.Value.CompareTo(value) == 0) return true;
+            if (EqualityComparer<T>.Default.Equals(current.Value, value)) return true;
             current = current.Next;
         }
         return false;

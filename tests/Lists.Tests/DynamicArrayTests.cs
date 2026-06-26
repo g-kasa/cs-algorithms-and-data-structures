@@ -7,14 +7,14 @@ public class DynamicArrayTests
     [Fact]
     public void Count_NewArray_IsZero()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         Assert.Equal(0, arr.Count);
     }
 
     [Fact]
     public void Capacity_NewArray_IsFour()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         Assert.Equal(4, arr.Capacity);
     }
 
@@ -23,7 +23,7 @@ public class DynamicArrayTests
     [Fact]
     public void Add_SingleElement_CountIsOneAndElementAccessible()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         arr.Add(42);
         Assert.Equal(1, arr.Count);
         Assert.Equal(42, arr[0]);
@@ -32,7 +32,7 @@ public class DynamicArrayTests
     [Fact]
     public void Add_TwoElements_BothAccessibleInOrder()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         arr.Add(10);
         arr.Add(20);
         Assert.Equal(2, arr.Count);
@@ -43,7 +43,7 @@ public class DynamicArrayTests
     [Fact]
     public void Add_FillsInitialCapacity_CapacityDoubles()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         // Initial capacity is 4; adding a 5th element must trigger a resize.
         arr.Add(1);
         arr.Add(2);
@@ -59,7 +59,7 @@ public class DynamicArrayTests
     [Fact]
     public void Add_RepeatedDoublings_CapacityGrowsCorrectly()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         // After 8 adds capacity should be 8; after 9th it becomes 16, etc.
         for (int i = 0; i < 8; i++) arr.Add(i);
         Assert.Equal(8, arr.Capacity);
@@ -81,7 +81,7 @@ public class DynamicArrayTests
     public void Add_LargeInput_AllElementsStoredCorrectly()
     {
         const int n = 2_000;
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         for (int i = 0; i < n; i++) arr.Add(i);
 
         Assert.Equal(n, arr.Count);
@@ -132,7 +132,7 @@ public class DynamicArrayTests
     [Fact]
     public void Indexer_Get_OnEmptyArray_ThrowsArgumentOutOfRangeException()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         Assert.Throws<ArgumentOutOfRangeException>(() => _ = arr[0]);
     }
 
@@ -174,7 +174,7 @@ public class DynamicArrayTests
     [Fact]
     public void Insert_IntoEmptyArray_AtIndexZero_CountIsOne()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         arr.Insert(0, 42);
         Assert.Equal(1, arr.Count);
         Assert.Equal(42, arr[0]);
@@ -258,7 +258,7 @@ public class DynamicArrayTests
     [Fact]
     public void RemoveAt_EmptyArray_ThrowsArgumentOutOfRangeException()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         Assert.Throws<ArgumentOutOfRangeException>(() => arr.RemoveAt(0));
     }
 
@@ -296,7 +296,7 @@ public class DynamicArrayTests
     [Fact]
     public void Remove_OnEmptyArray_ReturnsFalse()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         Assert.False(arr.Remove(1));
     }
 
@@ -369,7 +369,7 @@ public class DynamicArrayTests
     [Fact]
     public void BinarySearch_EmptyArray_ReturnsNegativeOne()
     {
-        Assert.Equal(-1, new DynamicArray<int>().BinarySearch(5));
+        Assert.Equal(-1, new SortableDynamicArray<int>().BinarySearch(5));
     }
 
     [Fact]
@@ -434,7 +434,7 @@ public class DynamicArrayTests
     [Fact]
     public void Sort_EmptyArray_NoException()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         arr.Sort(); // must not throw
         Assert.Equal(0, arr.Count);
     }
@@ -512,7 +512,7 @@ public class DynamicArrayTests
     [Fact]
     public void Rotate_EmptyArray_NoException()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         arr.Rotate(3); // must not throw
         Assert.Equal(0, arr.Count);
     }
@@ -646,7 +646,7 @@ public class DynamicArrayTests
     [Fact]
     public void Integration_AddSortBinarySearchRemove_WorksEndToEnd()
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         int[] values = [5, 3, 8, 1, 9, 2, 7, 4, 6, 0];
         foreach (var v in values) arr.Add(v);
 
@@ -686,9 +686,9 @@ public class DynamicArrayTests
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
-    private static DynamicArray<int> ArrayOf(params int[] values)
+    private static SortableDynamicArray<int> ArrayOf(params int[] values)
     {
-        var arr = new DynamicArray<int>();
+        var arr = new SortableDynamicArray<int>();
         foreach (var v in values) arr.Add(v);
         return arr;
     }

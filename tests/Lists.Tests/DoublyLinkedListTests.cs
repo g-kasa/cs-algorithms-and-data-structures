@@ -7,7 +7,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void Count_NewList_IsZero()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         Assert.Equal(0, list.Count);
     }
 
@@ -16,7 +16,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddFirst_OnEmptyList_CountIsOne()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(1);
         Assert.Equal(1, list.Count);
     }
@@ -24,7 +24,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddFirst_OnEmptyList_ElementIsEnumerated()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(42);
         Assert.Equal([42], list);
     }
@@ -32,7 +32,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddFirst_MultipleElements_PrependsInOrder()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(3);
         list.AddFirst(2);
         list.AddFirst(1);
@@ -42,7 +42,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddFirst_MultipleElements_CountMatchesNumberOfCalls()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(1);
         list.AddFirst(2);
         list.AddFirst(3);
@@ -52,7 +52,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddFirst_ThenAddLast_HeadAndTailAreCorrect()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(2);
         list.AddLast(3);
         list.AddFirst(1);
@@ -64,7 +64,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddLast_OnEmptyList_CountIsOne()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(1);
         Assert.Equal(1, list.Count);
     }
@@ -72,7 +72,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddLast_OnEmptyList_ElementIsEnumerated()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(99);
         Assert.Equal([99], list);
     }
@@ -80,7 +80,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddLast_MultipleElements_AppendsInOrder()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(1);
         list.AddLast(2);
         list.AddLast(3);
@@ -90,7 +90,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddLast_MultipleElements_CountMatchesNumberOfCalls()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(10);
         list.AddLast(20);
         list.AddLast(30);
@@ -100,7 +100,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddLast_DuplicateValues_AllStoredInOrder()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(5);
         list.AddLast(5);
         list.AddLast(5);
@@ -113,7 +113,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void RemoveFirst_EmptyList_ThrowsInvalidOperationException()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         Assert.Throws<InvalidOperationException>(() => list.RemoveFirst());
     }
 
@@ -184,7 +184,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void RemoveLast_EmptyList_ThrowsInvalidOperationException()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         Assert.Throws<InvalidOperationException>(() => list.RemoveLast());
     }
 
@@ -398,7 +398,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void Contains_BoundaryValues_ReturnsTrue()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(int.MinValue);
         list.AddLast(int.MaxValue);
         Assert.True(list.Contains(int.MinValue));
@@ -410,7 +410,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void Reverse_EmptyList_NoExceptionAndStaysEmpty()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.Reverse();
         Assert.Empty(list);
         Assert.Equal(0, list.Count);
@@ -511,7 +511,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void Sort_EmptyList_NoExceptionAndStaysEmpty()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.Sort();
         Assert.Equal(0, list.Count);
         Assert.Empty(list);
@@ -521,7 +521,7 @@ public class DoublyLinkedListTests
     [MemberData(nameof(SortCases))]
     public void Sort_GivenInput_ProducesAscendingOrder(int[] input, int[] expected)
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         foreach (var x in input) list.AddLast(x);
         list.Sort();
         Assert.Equal(expected, list);
@@ -583,7 +583,7 @@ public class DoublyLinkedListTests
     {
         // Use a list of tuples encoded as ints: sort by first digit, second digit is tie-breaker
         // to observe stability. We use strings to embed stable-sort evidence.
-        var list = new DoublyLinkedList<string>();
+        var list = new SortableDoublyLinkedList<string>();
         list.AddLast("b1");
         list.AddLast("a2");
         list.AddLast("a1");
@@ -598,7 +598,7 @@ public class DoublyLinkedListTests
     {
         var rng = new Random(42);
         var input = Enumerable.Range(0, 1_000).Select(_ => rng.Next(10_000)).ToArray();
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         foreach (var x in input) list.AddLast(x);
 
         list.Sort();
@@ -631,7 +631,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void GetEnumerator_AfterAddFirstAndAddLast_OrderIsHeadToTail()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(2);
         list.AddFirst(1);
         list.AddLast(3);
@@ -652,7 +652,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void AddFirst_AddLast_Remove_Contains_IntegrationScenario()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddLast(2);
         list.AddFirst(1);
         list.AddLast(3);
@@ -692,7 +692,7 @@ public class DoublyLinkedListTests
     public void LargeInput_AddLast_CountAndEnumeration_AreCorrect()
     {
         const int n = 1_000;
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         for (var i = 0; i < n; i++) list.AddLast(i);
 
         Assert.Equal(n, list.Count);
@@ -703,7 +703,7 @@ public class DoublyLinkedListTests
     public void LargeInput_AddFirst_CountAndEnumeration_AreCorrect()
     {
         const int n = 1_000;
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         for (var i = 0; i < n; i++) list.AddFirst(i);
 
         Assert.Equal(n, list.Count);
@@ -714,7 +714,7 @@ public class DoublyLinkedListTests
     public void LargeInput_RemoveFirst_AllElements_CountDropsToZero()
     {
         const int n = 1_000;
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         for (var i = 0; i < n; i++) list.AddLast(i);
 
         for (var i = 0; i < n; i++) list.RemoveFirst();
@@ -727,7 +727,7 @@ public class DoublyLinkedListTests
     public void LargeInput_RemoveLast_AllElements_CountDropsToZero()
     {
         const int n = 1_000;
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         for (var i = 0; i < n; i++) list.AddLast(i);
 
         for (var i = 0; i < n; i++) list.RemoveLast();
@@ -740,7 +740,7 @@ public class DoublyLinkedListTests
     public void LargeInput_Reverse_ProducesCorrectOrder()
     {
         const int n = 1_000;
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         for (var i = 0; i < n; i++) list.AddLast(i);
 
         list.Reverse();
@@ -751,7 +751,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void LargeInput_Contains_BoundaryValues_AreFound()
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(int.MinValue);
         list.AddLast(int.MaxValue);
         for (var i = 1; i < 999; i++) list.AddLast(i);
@@ -763,9 +763,9 @@ public class DoublyLinkedListTests
 
     // ── Helpers ─────────────────────────────────────────────────────────────
 
-    private static DoublyLinkedList<int> ListOf(params int[] values)
+    private static SortableDoublyLinkedList<int> ListOf(params int[] values)
     {
-        var list = new DoublyLinkedList<int>();
+        var list = new SortableDoublyLinkedList<int>();
         foreach (var v in values) list.AddLast(v);
         return list;
     }

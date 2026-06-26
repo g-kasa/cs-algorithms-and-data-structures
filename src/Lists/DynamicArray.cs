@@ -3,22 +3,22 @@ using System.Collections;
 namespace Algorithms.Lists;
 
 /// <summary>A resizable array that grows automatically as elements are added.</summary>
-/// <typeparam name="T">The element type; must implement <see cref="IComparable{T}"/> to support sorting and binary search.</typeparam>
+/// <typeparam name="T">The element type; must be non-nullable.</typeparam>
 /// <remarks>
 /// Backed by a contiguous <c>T[]</c> that starts at capacity 4 and doubles whenever it is full.
 /// The backing array never shrinks automatically.
 /// Time:  Add O(1) amortized, Insert/RemoveAt/Remove O(n), Contains/IndexOf O(n),
-///        BinarySearch O(log n), Sort O(n log n), Rotate O(n), indexer O(1).
+///        Rotate O(n), indexer O(1).
 /// Space: O(n).
 /// </remarks>
-public sealed class DynamicArray<T> : IEnumerable<T> where T : IComparable<T>
+public class DynamicArray<T> : IEnumerable<T> where T : notnull
 {
     private const int InitialCapacity = 4;
 
-    private T[] _items = new T[InitialCapacity];
+    protected T[] _items = new T[InitialCapacity];
 
     /// <summary>Gets the number of elements currently stored in the array.</summary>
-    public int Count { get; private set; }
+    public int Count { get; protected set; }
 
     /// <summary>Gets the current length of the backing array.</summary>
     public int Capacity => _items.Length;
@@ -115,44 +115,10 @@ public sealed class DynamicArray<T> : IEnumerable<T> where T : IComparable<T>
     {
         for (int i = 0; i < Count; i++)
         {
-            if (_items[i].CompareTo(value) == 0) return i;
+            if (EqualityComparer<T>.Default.Equals(_items[i], value)) return i;
         }
         return -1;
     }
-
-    /// <summary>
-    /// Searches a <em>sorted</em> array for <paramref name="value"/> using binary search and returns its zero-based index, or -1 if not found.
-    /// </summary>
-    /// <remarks>
-    /// The array must be sorted in ascending order before calling this method; behaviour is undefined otherwise.
-    /// Time: O(log n).
-    /// </remarks>
-    public int BinarySearch(T value)
-    {
-        int low = 0;
-        int high = Count - 1;
-
-        while (low <= high)
-        {
-            // Compute the midpoint without integer overflow.
-            int mid = low + (high - low) / 2;
-            int comparison = _items[mid].CompareTo(value);
-
-            if (comparison == 0) return mid;
-            if (comparison < 0) low = mid + 1;
-            else high = mid - 1;
-        }
-
-        return -1;
-    }
-
-    /// <summary>Sorts the array in ascending order.</summary>
-    /// <remarks>
-    /// Delegates to <see cref="Array.Sort{T}(T[], int, int)"/> on the live slice,
-    /// which uses an introspective sort (introsort) internally.
-    /// Time: O(n log n) average and worst. Space: O(log n) stack space for recursion.
-    /// </remarks>
-    public void Sort() => Array.Sort(_items, 0, Count);
 
     /// <summary>
     /// Rotates the array left by <paramref name="steps"/> positions in place.
@@ -187,7 +153,7 @@ public sealed class DynamicArray<T> : IEnumerable<T> where T : IComparable<T>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     // Doubles the backing array when it is full.
-    private void EnsureCapacity()
+    protected void EnsureCapacity()
     {
         if (Count < _items.Length) return;
 
@@ -197,7 +163,7 @@ public sealed class DynamicArray<T> : IEnumerable<T> where T : IComparable<T>
     }
 
     // Reverses the slice _items[lo..hi] inclusive.
-    private void Reverse(int lo, int hi)
+    protected void Reverse(int lo, int hi)
     {
         while (lo < hi)
         {

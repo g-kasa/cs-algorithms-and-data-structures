@@ -3,26 +3,26 @@ using System.Collections;
 namespace Algorithms.Lists;
 
 /// <summary>A doubly-linked list with O(1) prepend, append, and end-removal operations.</summary>
-/// <typeparam name="T">The element type; must implement <see cref="IComparable{T}"/> to support sorting.</typeparam>
+/// <typeparam name="T">The element type; must be non-nullable.</typeparam>
 /// <remarks>
 /// Time:  AddFirst O(1), AddLast O(1), RemoveFirst O(1), RemoveLast O(1),
-///        Remove O(n), Contains O(n), Reverse O(n), Sort O(n log n).
-/// Space: O(n) for n elements; O(log n) auxiliary for Sort (recursion stack), O(1) for all other operations.
+///        Remove O(n), Contains O(n), Reverse O(n).
+/// Space: O(n) for n elements; O(1) auxiliary for all operations.
 /// </remarks>
-public sealed class DoublyLinkedList<T> : IEnumerable<T> where T : IComparable<T>
+public class DoublyLinkedList<T> : IEnumerable<T> where T : notnull
 {
-    private sealed class Node(T value, Node? next = null, Node? previous = null)
+    protected sealed class Node(T value, Node? next = null, Node? previous = null)
     {
         internal T Value = value;
         internal Node? Next = next;
         internal Node? Previous = previous;
     }
 
-    private Node? _head;
-    private Node? _tail;
+    protected Node? _head;
+    protected Node? _tail;
 
     /// <summary>Gets the number of elements in the list.</summary>
-    public int Count { get; private set; }
+    public int Count { get; protected set; }
 
     /// <summary>Adds <paramref name="value"/> to the front of the list.</summary>
     /// <remarks>Time: O(1).</remarks>
@@ -110,7 +110,7 @@ public sealed class DoublyLinkedList<T> : IEnumerable<T> where T : IComparable<T
         var current = _head;
         while (current is not null)
         {
-            if (current.Value.CompareTo(value) == 0)
+            if (EqualityComparer<T>.Default.Equals(current.Value, value))
             {
                 Unlink(current);
                 Count--;
@@ -128,7 +128,7 @@ public sealed class DoublyLinkedList<T> : IEnumerable<T> where T : IComparable<T
         var current = _head;
         while (current is not null)
         {
-            if (current.Value.CompareTo(value) == 0) return true;
+            if (EqualityComparer<T>.Default.Equals(current.Value, value)) return true;
             current = current.Next;
         }
         return false;
@@ -149,28 +149,6 @@ public sealed class DoublyLinkedList<T> : IEnumerable<T> where T : IComparable<T
             current.Previous = next;
             current = next;
         }
-    }
-
-    /// <summary>Sorts the list in ascending order using merge sort on the node links.</summary>
-    /// <remarks>
-    /// Time: O(n log n) average and worst. Space: O(log n) — recursion stack depth; no array allocation.
-    /// Stable: yes (equal elements preserve their original relative order).
-    /// </remarks>
-    public void Sort()
-    {
-        if (_head is null || _head.Next is null) return;
-
-        _head = MergeSort(_head);
-
-        // After relinking, rebuild the tail pointer and restore all Previous links.
-        var current = _head;
-        _head.Previous = null;
-        while (current.Next is not null)
-        {
-            current.Next.Previous = current;
-            current = current.Next;
-        }
-        _tail = current;
     }
 
     /// <summary>Returns an enumerator that iterates through the list from head to tail.</summary>
@@ -200,60 +178,4 @@ public sealed class DoublyLinkedList<T> : IEnumerable<T> where T : IComparable<T
             _tail = node.Previous;
     }
 
-    // Returns the head of a sorted list built from the chain starting at <paramref name="head"/>.
-    // Previous pointers are not maintained during recursion; Sort() restores them in one pass.
-    private static Node MergeSort(Node head)
-    {
-        if (head.Next is null) return head;
-
-        var middle = FindMiddle(head);
-        var secondHalf = middle.Next!;
-        // Sever the link so both halves are independent chains.
-        middle.Next = null;
-
-        var left = MergeSort(head);
-        var right = MergeSort(secondHalf);
-        return Merge(left, right);
-    }
-
-    // Finds the middle node using slow/fast pointers (floor of n/2 for even-length lists).
-    private static Node FindMiddle(Node head)
-    {
-        var slow = head;
-        var fast = head.Next;
-        while (fast is not null && fast.Next is not null)
-        {
-            slow = slow.Next!;
-            fast = fast.Next.Next;
-        }
-        return slow;
-    }
-
-    // Merges two sorted chains and returns the head of the merged chain.
-    private static Node Merge(Node left, Node right)
-    {
-        // Use a sentinel to avoid a special case for the first merged node.
-        var sentinel = new Node(default!);
-        var tail = sentinel;
-
-        while (true)
-        {
-            if (left.Value.CompareTo(right.Value) <= 0)
-            {
-                tail.Next = left;
-                tail = left;
-                left = left.Next!;
-                if (left is null) { tail.Next = right; break; }
-            }
-            else
-            {
-                tail.Next = right;
-                tail = right;
-                right = right.Next!;
-                if (right is null) { tail.Next = left; break; }
-            }
-        }
-
-        return sentinel.Next!;
-    }
 }

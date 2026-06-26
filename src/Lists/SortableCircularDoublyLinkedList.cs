@@ -6,6 +6,7 @@ namespace Algorithms.Lists;
 /// <typeparam name="T">Element type; must implement <see cref="IComparable{T}"/>.</typeparam>
 /// <remarks>
 /// Inherits all O(1)/O(n) operations from <see cref="CircularDoublyLinkedList{T}"/>.
+/// All sort methods are thread-safe and serialise through the inherited monitor lock.
 /// Time:  SelectionSort O(n²), InsertionSort O(n²), MergeSort O(n log n).
 /// Space: O(1) auxiliary for SelectionSort and InsertionSort.
 ///        O(log n) call-stack depth for MergeSort.
@@ -20,22 +21,25 @@ public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedLi
     /// <remarks>Time: O(n²). Space: O(1).</remarks>
     public void SelectionSort()
     {
-        var outer = _sentinel.Next;
-        while (outer != _sentinel)
+        lock (_syncRoot)
         {
-            var minimum = outer;
-            var inner = outer.Next;
-            while (inner != _sentinel)
+            var outer = _sentinel.Next;
+            while (outer != _sentinel)
             {
-                if (inner.Value.CompareTo(minimum.Value) < 0)
-                    minimum = inner;
-                inner = inner.Next;
+                var minimum = outer;
+                var inner = outer.Next;
+                while (inner != _sentinel)
+                {
+                    if (inner.Value.CompareTo(minimum.Value) < 0)
+                        minimum = inner;
+                    inner = inner.Next;
+                }
+
+                if (minimum != outer)
+                    (outer.Value, minimum.Value) = (minimum.Value, outer.Value);
+
+                outer = outer.Next;
             }
-
-            if (minimum != outer)
-                (outer.Value, minimum.Value) = (minimum.Value, outer.Value);
-
-            outer = outer.Next;
         }
     }
 
@@ -48,27 +52,24 @@ public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedLi
     /// <remarks>Time: O(n²) average and worst. O(n) best when already sorted. Space: O(1).</remarks>
     public void InsertionSort()
     {
-        // When Count <= 1, _sentinel.Next.Next == _sentinel, so the outer loop never runs.
-        var cursor = _sentinel.Next.Next;
-        while (cursor != _sentinel)
+        lock (_syncRoot)
         {
-            var next = cursor.Next;
-            var key = cursor.Value;
-
-            // Walk backwards through the sorted prefix, shifting each value one position
-            // to the right, until we find a node whose value is <= key or we hit the sentinel.
-            var scan = cursor.Prev;
-            while (scan != _sentinel && scan.Value.CompareTo(key) > 0)
+            var cursor = _sentinel.Next.Next;
+            while (cursor != _sentinel)
             {
-                scan.Next.Value = scan.Value;
-                scan = scan.Prev;
+                var next = cursor.Next;
+                var key = cursor.Value;
+
+                var scan = cursor.Prev;
+                while (scan != _sentinel && scan.Value.CompareTo(key) > 0)
+                {
+                    scan.Next.Value = scan.Value;
+                    scan = scan.Prev;
+                }
+
+                scan.Next.Value = key;
+                cursor = next;
             }
-
-            // scan.Next is the gap: either the sentinel's successor, or the node
-            // immediately after the last sorted value that was <= key.
-            scan.Next.Value = key;
-
-            cursor = next;
         }
     }
 
@@ -80,45 +81,39 @@ public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedLi
     /// <remarks>Time: O(n log n). Space: O(log n) call-stack depth.</remarks>
     public void MergeSort()
     {
-        if (Count < 2) return;
-
-        // Step 1: Detach the sentinel to produce a linear doubly-linked chain.
-        var first = _sentinel.Next;
-        var last = _sentinel.Prev;
-        first.Prev = null!;
-        last.Next = null!;
-
-        // Step 2: Sort the linear chain.
-        first = MergeSortCore(first);
-
-        // Step 3: Re-circularize by wiring the sentinel back as the head/tail anchor.
-        _sentinel.Next = first;
-        first.Prev = _sentinel;
-
-        // Walk to the sorted tail and fix every Prev pointer that MergeSortCore left
-        // pointing to the old linear-chain neighbour rather than the newly merged node.
-        var current = first;
-        while (current.Next is not null)
+        lock (_syncRoot)
         {
-            current.Next.Prev = current;
-            current = current.Next;
-        }
+            if (Count < 2) return;
 
-        // current is now the sorted tail.
-        _sentinel.Prev = current;
-        current.Next = _sentinel;
+            var first = _sentinel.Next;
+            var last = _sentinel.Prev;
+            first.Prev = null!;
+            last.Next = null!;
+
+            first = MergeSortCore(first);
+
+            _sentinel.Next = first;
+            first.Prev = _sentinel;
+
+            var current = first;
+            while (current.Next is not null)
+            {
+                current.Next.Prev = current;
+                current = current.Next;
+            }
+
+            _sentinel.Prev = current;
+            current.Next = _sentinel;
+        }
     }
 
-    // Recursively splits, sorts, and merges the linear subchain rooted at head.
-    // head.Prev is assumed to be null (caller has already severed the back-link).
     private static Node MergeSortCore(Node head)
     {
-        // A single-node chain is already sorted.
         if (head.Next is null) return head;
 
         var middle = FindMiddle(head);
         var rightHead = middle.Next!;
-        middle.Next = null!; // sever the two halves into independent linear chains
+        middle.Next = null!;
 
         var sortedLeft = MergeSortCore(head);
         var sortedRight = MergeSortCore(rightHead);
@@ -126,8 +121,6 @@ public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedLi
         return Merge(sortedLeft, sortedRight);
     }
 
-    // Returns the last node of the first half of the linear chain using the slow/fast
-    // pointer technique. When fast reaches the end, slow is at the midpoint.
     private static Node FindMiddle(Node head)
     {
         var slow = head;
@@ -142,12 +135,8 @@ public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedLi
         return slow;
     }
 
-    // Merges two sorted linear chains into one sorted linear chain by relinking Next pointers.
-    // Prev pointers are left in an intermediate state; MergeSort fixes them after the recursion
-    // unwinds, walking the completed chain once to set every Prev correctly.
     private static Node Merge(Node left, Node right)
     {
-        // A local sentinel avoids a special case for selecting the very first merged node.
         var localSentinel = new Node(default(T)!);
         var tail = localSentinel;
 
@@ -155,8 +144,6 @@ public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedLi
         {
             if (left.Value.CompareTo(right.Value) <= 0)
             {
-                // Advance tail before the exhaustion check; otherwise tail.Next = right (below)
-                // would overwrite the pointer we just set with tail.Next = left.
                 tail.Next = left;
                 tail = left;
                 left = left.Next!;

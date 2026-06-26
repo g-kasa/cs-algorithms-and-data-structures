@@ -11,6 +11,7 @@ namespace Algorithms.Lists;
 /// <remarks>
 /// Inherits all base operations (AddFirst, AddLast, RemoveFirst, RemoveLast, Remove, Contains,
 /// Reverse) at their original complexities. All sorts are ascending and operate in place.
+/// All sort methods are thread-safe and serialise through the inherited monitor lock.
 ///
 /// Time:  BubbleSort O(n²) average/worst, O(n) best (already sorted).
 ///        SelectionSort O(n²) always.
@@ -32,32 +33,31 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
     /// </remarks>
     public void BubbleSort()
     {
-        if (_head is null || _head.Next is null) return;
-
-        // unsortedTail marks the boundary between the unsorted prefix and the sorted
-        // suffix that has already bubbled into place. It retreats one node per pass.
-        Node? unsortedTail = null;
-
-        while (true)
+        lock (_syncRoot)
         {
-            bool swapped = false;
-            var current = _head;
+            if (_head is null || _head.Next is null) return;
 
-            while (current.Next is not null && current.Next != unsortedTail)
+            Node? unsortedTail = null;
+
+            while (true)
             {
-                if (current.Value.CompareTo(current.Next.Value) > 0)
+                bool swapped = false;
+                var current = _head;
+
+                while (current.Next is not null && current.Next != unsortedTail)
                 {
-                    (current.Value, current.Next.Value) = (current.Next.Value, current.Value);
-                    swapped = true;
+                    if (current.Value.CompareTo(current.Next.Value) > 0)
+                    {
+                        (current.Value, current.Next.Value) = (current.Next.Value, current.Value);
+                        swapped = true;
+                    }
+                    current = current.Next;
                 }
-                current = current.Next;
+
+                unsortedTail = current;
+
+                if (!swapped) break;
             }
-
-            // After this pass, `current` is the last node we visited — it now holds the
-            // largest value in the unsorted region and belongs in the sorted suffix.
-            unsortedTail = current;
-
-            if (!swapped) break;
         }
     }
 
@@ -72,23 +72,26 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
     /// </remarks>
     public void SelectionSort()
     {
-        var cursor = _head;
-        while (cursor is not null)
+        lock (_syncRoot)
         {
-            var minimumNode = cursor;
-            var scanner = cursor.Next;
-
-            while (scanner is not null)
+            var cursor = _head;
+            while (cursor is not null)
             {
-                if (scanner.Value.CompareTo(minimumNode.Value) < 0)
-                    minimumNode = scanner;
-                scanner = scanner.Next;
+                var minimumNode = cursor;
+                var scanner = cursor.Next;
+
+                while (scanner is not null)
+                {
+                    if (scanner.Value.CompareTo(minimumNode.Value) < 0)
+                        minimumNode = scanner;
+                    scanner = scanner.Next;
+                }
+
+                if (!ReferenceEquals(minimumNode, cursor))
+                    (cursor.Value, minimumNode.Value) = (minimumNode.Value, cursor.Value);
+
+                cursor = cursor.Next;
             }
-
-            if (!ReferenceEquals(minimumNode, cursor))
-                (cursor.Value, minimumNode.Value) = (minimumNode.Value, cursor.Value);
-
-            cursor = cursor.Next;
         }
     }
 
@@ -104,29 +107,27 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
     /// </remarks>
     public void InsertionSort()
     {
-        if (_head is null || _head.Next is null) return;
-
-        var cursor = _head.Next;
-        while (cursor is not null)
+        lock (_syncRoot)
         {
-            // Capture the next unsorted node before we overwrite cursor.Value.
-            var nextCursor = cursor.Next;
-            var key = cursor.Value;
+            if (_head is null || _head.Next is null) return;
 
-            // Walk backwards through the sorted prefix, shifting each value one node
-            // to the right to open a slot for `key`.
-            var scan = cursor.Previous;
-            while (scan is not null && scan.Value.CompareTo(key) > 0)
+            var cursor = _head.Next;
+            while (cursor is not null)
             {
-                scan.Next!.Value = scan.Value;
-                scan = scan.Previous;
+                var nextCursor = cursor.Next;
+                var key = cursor.Value;
+
+                var scan = cursor.Previous;
+                while (scan is not null && scan.Value.CompareTo(key) > 0)
+                {
+                    scan.Next!.Value = scan.Value;
+                    scan = scan.Previous;
+                }
+
+                (scan is null ? _head! : scan.Next!).Value = key;
+
+                cursor = nextCursor;
             }
-
-            // scan is null  →  key is smaller than every sorted element; write into _head.
-            // scan is not null  →  scan.Next is the correct slot (scan.Value ≤ key).
-            (scan is null ? _head! : scan.Next!).Value = key;
-
-            cursor = nextCursor;
         }
     }
 
@@ -142,19 +143,21 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
     /// </remarks>
     public void MergeSort()
     {
-        if (_head is null || _head.Next is null) return;
-
-        _head = MergeSortCore(_head);
-
-        // Rebuild Previous links and locate the new tail in one O(n) pass.
-        _head.Previous = null;
-        var current = _head;
-        while (current.Next is not null)
+        lock (_syncRoot)
         {
-            current.Next.Previous = current;
-            current = current.Next;
+            if (_head is null || _head.Next is null) return;
+
+            _head = MergeSortCore(_head);
+
+            _head.Previous = null;
+            var current = _head;
+            while (current.Next is not null)
+            {
+                current.Next.Previous = current;
+                current = current.Next;
+            }
+            _tail = current;
         }
-        _tail = current;
     }
 
     /// <summary>Sorts the list in ascending order. Delegates to <see cref="MergeSort"/>.</summary>
@@ -165,13 +168,10 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
     // Operates only on Next links; Previous links are rebuilt by the public caller.
     private static Node MergeSortCore(Node head)
     {
-        // Base case: a single node is already sorted.
         if (head.Next is null) return head;
 
         Node middle = FindMiddle(head);
         Node rightHead = middle.Next!;
-
-        // Sever the chain so the two halves are independent singly-linked lists.
         middle.Next = null;
 
         Node sortedLeft = MergeSortCore(head);
@@ -181,7 +181,6 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
     }
 
     // Returns the last node of the first half using the slow/fast pointer technique.
-    // For a two-node chain this returns the first node, keeping the split balanced.
     private static Node FindMiddle(Node head)
     {
         var slow = head;
@@ -196,13 +195,9 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
         return slow;
     }
 
-    // Merges two sorted, singly-linked chains (only Next links are meaningful here)
-    // into one sorted chain and returns its head. Uses a sentinel to avoid a null
-    // check on every iteration.
+    // Merges two sorted, singly-linked chains into one sorted chain by relinking Next pointers.
     private static Node Merge(Node left, Node right)
     {
-        // The sentinel's Value is never read; it exists only to give `tail` a
-        // non-null starting point so the loop body is uniform from the first iteration.
         var sentinel = new Node(default!);
         var tail = sentinel;
 
@@ -211,14 +206,14 @@ public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : 
             if (left.Value.CompareTo(right.Value) <= 0)
             {
                 tail.Next = left;
-                tail = left;          // advance tail before checking exhaustion
+                tail = left;
                 left = left.Next!;
                 if (left is null) { tail.Next = right; break; }
             }
             else
             {
                 tail.Next = right;
-                tail = right;         // advance tail before checking exhaustion
+                tail = right;
                 right = right.Next!;
                 if (right is null) { tail.Next = left; break; }
             }

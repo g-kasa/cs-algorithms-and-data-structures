@@ -156,11 +156,10 @@ public sealed class SortableDynamicArray<T> : DynamicArray<T> where T : ICompara
         int gap = 1;
         while (gap < Count)
             gap = 3 * gap + 1;
+        gap /= 3;
 
         while (gap >= 1)
         {
-            gap /= 3;
-
             for (int i = gap; i < Count; i++)
             {
                 T key = _items[i];
@@ -174,6 +173,8 @@ public sealed class SortableDynamicArray<T> : DynamicArray<T> where T : ICompara
 
                 _items[j] = key;
             }
+
+            gap /= 3;
         }
     }
 

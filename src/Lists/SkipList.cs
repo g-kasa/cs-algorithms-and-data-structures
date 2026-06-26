@@ -6,13 +6,13 @@ namespace Algorithms.Lists;
 /// A probabilistic sorted data structure that maintains multiple levels of linked lists,
 /// allowing binary-search-like skipping over large portions of the data on each operation.
 /// </summary>
-/// <typeparam name="T">The element type; must implement <see cref="IComparable{T}"/>.</typeparam>
+/// <typeparam name="T">The element type; must be non-nullable and implement <see cref="IComparable{T}"/>.</typeparam>
 /// <remarks>
 /// Time:  Insert O(log n) average, O(n) worst. Contains O(log n) average, O(n) worst.
 ///        Remove O(log n) average, O(n) worst. Count O(1).
 /// Space: O(n) expected for n elements (each node occupies O(1) levels on average given p = 0.5).
 /// </remarks>
-public sealed class SkipList<T> : IEnumerable<T> where T : IComparable<T>
+public sealed class SkipList<T> : IEnumerable<T> where T : notnull, IComparable<T>
 {
     private const int MaxLevels = 16;
 
@@ -25,7 +25,7 @@ public sealed class SkipList<T> : IEnumerable<T> where T : IComparable<T>
     // The header sentinel is never yielded to callers; its Value is unused.
     private readonly Node _header = new(default!, MaxLevels);
 
-    // Index of the highest level that currently contains at least one real node (0-based).
+    // Count of currently active levels; callers iterate from `_currentLevel - 1` down to 0.
     private int _currentLevel;
 
     /// <summary>Gets the number of elements currently in the skip list.</summary>

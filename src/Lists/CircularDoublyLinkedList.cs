@@ -152,7 +152,7 @@ public class CircularDoublyLinkedList<T> : IEnumerable<T> where T : notnull
 
         // Walk forward to find the node that will sit immediately before the sentinel
         // after the rotation.  After a left-rotation by k the new last element is the
-        // one currently at position k (0-indexed from the current first element).
+        // one currently at position k-1 (0-indexed from the current first element).
         var newLast = _sentinel.Next;
         for (int i = 1; i < normalised; i++)
             newLast = newLast.Next;

@@ -524,18 +524,18 @@ public class SortableDoublyLinkedListTests
     // preserving insertion order for equal keys.
 
     [Fact]
-    public void MergeSort_IsStable_EqualStringKeysPreserveInsertionOrder()
+    public void MergeSort_IsStable_EqualKeysPreserveInsertionOrder()
     {
-        // Strings sort lexicographically. "a1" < "a2" < "b1" < "b2".
-        // The test encodes four values with identical first characters in two
-        // pairs; stable sort must keep them in lexicographic (= insertion) order.
-        var list = new SortableDoublyLinkedList<string>();
-        list.AddLast("b1");
-        list.AddLast("a2");
-        list.AddLast("a1");
-        list.AddLast("b2");
+        var list = new SortableDoublyLinkedList<StableItem>();
+        list.AddLast(new StableItem(2, 'A'));
+        list.AddLast(new StableItem(1, 'B'));
+        list.AddLast(new StableItem(2, 'C'));
+        list.AddLast(new StableItem(1, 'D'));
         list.MergeSort();
-        Assert.Equal(["a1", "a2", "b1", "b2"], list);
+        // Elements with equal keys must retain their original insertion order.
+        Assert.Equal(
+            [new StableItem(1, 'B'), new StableItem(1, 'D'), new StableItem(2, 'A'), new StableItem(2, 'C')],
+            list);
     }
 
     [Fact]
@@ -655,5 +655,10 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         foreach (var v in values) list.AddLast(v);
         return list;
+    }
+
+    private sealed record StableItem(int Key, char Label) : IComparable<StableItem>
+    {
+        public int CompareTo(StableItem? other) => Key.CompareTo(other?.Key ?? 0);
     }
 }

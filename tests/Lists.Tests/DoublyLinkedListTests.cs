@@ -581,16 +581,16 @@ public class DoublyLinkedListTests
     [Fact]
     public void Sort_IsStable_EqualElementsPreserveRelativeOrder()
     {
-        // Use a list of tuples encoded as ints: sort by first digit, second digit is tie-breaker
-        // to observe stability. We use strings to embed stable-sort evidence.
-        var list = new SortableDoublyLinkedList<string>();
-        list.AddLast("b1");
-        list.AddLast("a2");
-        list.AddLast("a1");
-        list.AddLast("b2");
+        var list = new SortableDoublyLinkedList<StableItem>();
+        list.AddLast(new StableItem(2, 'A'));
+        list.AddLast(new StableItem(1, 'B'));
+        list.AddLast(new StableItem(2, 'C'));
+        list.AddLast(new StableItem(1, 'D'));
         list.Sort();
-        // Alphabetical: a1, a2, b1, b2 — stable sort preserves insertion order for equal keys.
-        Assert.Equal(["a1", "a2", "b1", "b2"], list);
+        // Elements with equal keys must retain their original insertion order.
+        Assert.Equal(
+            [new StableItem(1, 'B'), new StableItem(1, 'D'), new StableItem(2, 'A'), new StableItem(2, 'C')],
+            list);
     }
 
     [Fact]
@@ -768,5 +768,10 @@ public class DoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         foreach (var v in values) list.AddLast(v);
         return list;
+    }
+
+    private sealed record StableItem(int Key, char Label) : IComparable<StableItem>
+    {
+        public int CompareTo(StableItem? other) => Key.CompareTo(other?.Key ?? 0);
     }
 }

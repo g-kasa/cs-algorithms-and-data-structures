@@ -6,9 +6,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$raw = [Console]::In.ReadToEnd(); $data = $raw | ConvertFrom-Json; if ($data.tool_input.file_path -like '*.cs') { dotnet build --nologo -v quiet 2>&1 | Select-Object -Last 5 }",
+            "command": "$raw = [Console]::In.ReadToEnd(); $data = $raw | ConvertFrom-Json; $path = $data.tool_input.file_path; if ($path -like '*.cs' -and $path -notlike '*Tests.cs') { dotnet build --nologo -v quiet 2>&1 | Select-Object -Last 5 }",
             "shell": "powershell",
             "statusMessage": "Building..."
+          },
+          {
+            "type": "command",
+            "command": "$raw = [Console]::In.ReadToEnd(); $data = $raw | ConvertFrom-Json; $path = $data.tool_input.file_path; if ($path -like '*Tests.cs') { $proj = Split-Path $path -Parent; dotnet test $proj --nologo -v quiet 2>&1 | Select-Object -Last 8 }",
+            "shell": "powershell",
+            "statusMessage": "Running tests..."
           }
         ]
       }

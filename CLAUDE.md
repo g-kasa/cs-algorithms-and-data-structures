@@ -1,26 +1,33 @@
 # CS Algorithms and Data Structures
 
-C# library collection implementing classic algorithms and data structures. Each topic is a separate class library project with its own xUnit test project.
+C# library of classic data structures with their algorithms implemented as methods on each structure.
+Each data structure topic is a separate class library project with its own xUnit test project.
+
+## Core philosophy
+
+Algorithms belong to data structures. Sorting is a method on a list. Traversal is a method on a tree.
+BFS and DFS are methods on a graph. This keeps code at the right level of abstraction and makes the
+relationship between data and algorithm explicit.
 
 ## Project Structure
 
 ```
 AlgorithmsAndDataStructures.sln
-Directory.Build.props          # Shared: net9.0, nullable, TreatWarningsAsErrors
+Directory.Build.props          # Shared: net9.0, nullable, ImplicitUsings, TreatWarningsAsErrors
 src/
-  <Topic>/                     # One classlib per topic (e.g. Sorting, Trees, Graphs)
+  <Topic>/                     # One classlib per data structure topic (Lists, Trees, Graphs, …)
     <Topic>.csproj
-    <Algorithm>.cs
+    <DataStructure>.cs
 tests/
   <Topic>.Tests/               # One xUnit project per src project
     <Topic>.Tests.csproj
-    <Algorithm>Tests.cs
+    <DataStructure>Tests.cs
 ```
 
 ## Adding a New Topic
 
 ```bash
-# 1. Create the library
+# 1. Create the class library
 dotnet new classlib -n <Topic> -o src/<Topic> -f net9.0
 dotnet sln AlgorithmsAndDataStructures.sln add src/<Topic>/<Topic>.csproj
 
@@ -34,58 +41,79 @@ rm src/<Topic>/Class1.cs
 rm tests/<Topic>.Tests/UnitTest1.cs
 ```
 
+Or use the **`project-scaffolder`** agent — it runs all of the above and verifies the build.
+
 ## Build & Test
 
 ```bash
 dotnet build                                              # Build everything
 dotnet test                                               # Run all tests
 dotnet test tests/<Topic>.Tests                           # Run one topic
-dotnet test --filter "FullyQualifiedName~QuickSort"       # Run specific test
+dotnet test --filter "FullyQualifiedName~BinarySearchTree" # Run specific tests
 ```
 
 ## Conventions
 
 ### Namespaces
 
-`Algorithms.<Topic>` — e.g. `Algorithms.Sorting`, `Algorithms.Trees`, `Algorithms.Graphs`
+`Algorithms.<Topic>` — e.g. `Algorithms.Lists`, `Algorithms.Trees`, `Algorithms.Graphs`
 
 ### Implementation Files
 
-- One public class (or static class) per file, named after the algorithm or data structure
-- All public members must have XML doc comments
-- Document time and space complexity in `<remarks>`:
+- One public class per file; file name matches class name.
+- Algorithms are **methods on the data structure**, not separate classes.
+- All public members have XML doc comments.
+- Document time and space complexity in `<remarks>` on the class and on each primary method.
+- Use `where T : IComparable<T>` when the structure requires ordering; `where T : notnull` when it only requires hashability.
 
 ```csharp
-/// <summary>Sorts an array in ascending order using quicksort.</summary>
+/// <summary>A binary search tree maintaining the BST invariant.</summary>
 /// <typeparam name="T">Element type; must implement <see cref="IComparable{T}"/>.</typeparam>
-/// <param name="array">The array to sort in place.</param>
 /// <remarks>
-/// Time: O(n log n) average, O(n²) worst.
-/// Space: O(log n) stack depth.
+/// Time: Insert/Contains/Remove O(log n) average, O(n) worst (degenerate tree).
+/// Space: O(n).
 /// </remarks>
-public static void Sort<T>(T[] array) where T : IComparable<T> { ... }
+public sealed class BinarySearchTree<T> where T : IComparable<T>
+{
+    /// <summary>Inserts <paramref name="value"/> into the tree. Duplicates are ignored.</summary>
+    public void Insert(T value) { ... }
+
+    /// <summary>Visits every element in ascending order (left → root → right).</summary>
+    public IEnumerable<T> InOrder() { ... }
+}
 ```
 
 ### Test Files
 
 - One test class per implementation class; name: `<ClassName>Tests`
 - Namespace: `Algorithms.<Topic>.Tests`
-- Cover at minimum: empty input, single element, duplicates, pre-sorted, reverse-sorted
+- Cover at minimum: empty input, single element, duplicates, pre-sorted, reverse-sorted, large input (1000+)
 - Use `[Theory]` + `[InlineData]` or `[MemberData]` for parameterized cases
+- Use a `private static <Type> TypeOf(params ...)` helper to keep test bodies concise
 - No mocking; all tests are pure unit tests
 
 ## Agents
 
-These agents are available for common tasks:
-
 | Agent | When to use |
 |-------|-------------|
-| `algorithm-reviewer` | Review a new implementation for correctness, edge cases, and convention compliance |
+| `csharp-developer` | Write a new data structure or add an algorithm to an existing one |
+| `doc-writer` | Update the Topics table in README/CLAUDE, or improve XML doc comments |
+| `project-scaffolder` | Scaffold a new data structure topic (creates csproj, test project, wires into solution) |
+| `algorithm-reviewer` | Review an implementation for correctness, edge cases, and convention compliance |
 | `test-generator` | Generate a comprehensive xUnit test suite for an implementation |
 | `complexity-analyzer` | Analyze and document Big-O time/space complexity |
 
+## Hooks
+
+| Trigger | Action |
+|---------|--------|
+| Edit/Write any `*.cs` (non-test) | `dotnet build` — catches compile errors immediately |
+| Edit/Write any `*Tests.cs` | `dotnet test <project>` — runs the affected test project |
+
 ## Topics
 
-| Topic | Namespace | Status |
-|-------|-----------|--------|
-| *(none yet)* | | |
+| Topic | Namespace | Data Structures | Key Operations | Status |
+|-------|-----------|-----------------|----------------|--------|
+| Lists | `Algorithms.Lists` | `SinglyLinkedList<T>` | AddFirst, AddLast, Remove, Contains, Reverse, Sort | ✓ |
+| Trees | `Algorithms.Trees` | `BinarySearchTree<T>` | Insert, Contains, Remove, InOrder, PreOrder, PostOrder, LevelOrder | ✓ |
+| Graphs | `Algorithms.Graphs` | `Graph<T>` | AddVertex, AddEdge, HasPath, DepthFirstSearch, BreadthFirstSearch | ✓ |

@@ -33,8 +33,14 @@ public class CircularDoublyLinkedList<T> : IList<T> where T : notnull
     protected readonly Node _sentinel = new(default(T)!);
     protected readonly object _syncRoot = new();
 
+    private int _count;
+
     /// <summary>Gets the number of elements in the list.</summary>
-    public int Count { get; protected set; }
+    public int Count
+    {
+        get => Volatile.Read(ref _count);
+        protected set => Volatile.Write(ref _count, value);
+    }
 
     /// <inheritdoc/>
     public bool IsReadOnly => false;

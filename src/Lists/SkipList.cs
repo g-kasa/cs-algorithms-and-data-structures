@@ -19,7 +19,7 @@ namespace Algorithms.Lists;
 /// do not need to hold a lock while iterating.
 /// Time:  Insert O(log n) average, O(n) worst. Contains O(log n) average, O(n) worst.
 ///        Remove O(log n) average, O(n) worst. Count O(1).
-///        IndexOf O(n). RemoveAt O(n log n). indexer getter O(n).
+///        IndexOf O(n). RemoveAt O(n). indexer getter O(n).
 /// Space: O(n) expected for n elements (each node occupies O(1) levels on average given p = 0.5).
 /// </remarks>
 public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
@@ -39,8 +39,14 @@ public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
     // Count of currently active levels; callers iterate from `_currentLevel - 1` down to 0.
     private int _currentLevel;
 
+    private int _count;
+
     /// <summary>Gets the number of elements currently in the skip list.</summary>
-    public int Count { get; private set; }
+    public int Count
+    {
+        get => Volatile.Read(ref _count);
+        private set => Volatile.Write(ref _count, value);
+    }
 
     /// <inheritdoc/>
     public bool IsReadOnly => false;
@@ -93,7 +99,7 @@ public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
     {
         lock (_syncRoot)
         {
-            Array.Clear(_header.Forward);
+            Array.Clear(_header.Forward, 0, _header.Forward.Length);
             _currentLevel = 0;
             Count = 0;
         }
@@ -143,7 +149,7 @@ public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
     /// <summary>Removes the element at position <paramref name="index"/> by traversing the level-0 chain.</summary>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="index"/> is less than 0 or greater than or equal to <see cref="Count"/>.</exception>
     /// <remarks>
-    /// Time: O(n log n) — O(n) to walk level-0 to the position, then O(n) per level to locate predecessors.
+    /// Time: O(n) — O(n) to walk level-0 to the position, then O(MaxLevels) reference-equality scans (constant factor).
     /// </remarks>
     public void RemoveAt(int index)
     {

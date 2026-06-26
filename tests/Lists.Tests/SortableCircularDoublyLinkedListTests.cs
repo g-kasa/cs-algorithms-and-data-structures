@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 public class SortableCircularDoublyLinkedListTests
 {
@@ -356,7 +356,7 @@ public class SortableCircularDoublyLinkedListTests
     {
         var list = new SortableCircularDoublyLinkedList<int>();
         list.MergeSort();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -365,7 +365,7 @@ public class SortableCircularDoublyLinkedListTests
     {
         var list = ListOf(42);
         list.MergeSort();
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
         Assert.Equal([42], list);
     }
 
@@ -381,7 +381,7 @@ public class SortableCircularDoublyLinkedListTests
         // Structural probe: the ring must survive a RemoveFirst followed by RemoveLast.
         Assert.Equal(1, list.RemoveFirst());
         Assert.Equal(2, list.RemoveLast());
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]

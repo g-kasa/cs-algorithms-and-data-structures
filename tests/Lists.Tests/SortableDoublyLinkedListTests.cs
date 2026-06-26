@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 /// <summary>
 /// Comprehensive tests for <see cref="SortableDoublyLinkedList{T}"/> covering all four sort
@@ -73,7 +73,7 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.BubbleSort();
         Assert.Empty(list);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.SelectionSort();
         Assert.Empty(list);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.InsertionSort();
         Assert.Empty(list);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -367,7 +367,7 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.MergeSort();
         Assert.Empty(list);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -575,7 +575,7 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.Sort();
         Assert.Empty(list);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]

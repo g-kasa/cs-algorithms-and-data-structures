@@ -22,8 +22,14 @@ public class DynamicArray<T> : IList<T> where T : notnull
     protected T[] _items = new T[InitialCapacity];
     protected readonly object _syncRoot = new();
 
+    private int _count;
+
     /// <summary>Gets the number of elements currently stored in the array.</summary>
-    public int Count { get; protected set; }
+    public int Count
+    {
+        get => Volatile.Read(ref _count);
+        protected set => Volatile.Write(ref _count, value);
+    }
 
     /// <summary>Gets the current length of the backing array.</summary>
     public int Capacity

@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$raw = [Console]::In.ReadToEnd(); $data = $raw | ConvertFrom-Json; if ($data.tool_input.file_path -like '*.cs') { dotnet build --nologo -v quiet 2>&1 | Select-Object -Last 5 }",
+            "shell": "powershell",
+            "statusMessage": "Building..."
+          }
+        ]
+      }
+    ]
+  }
+}

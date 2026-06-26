@@ -1,0 +1,13 @@
+bin/
+obj/
+*.user
+.vs/
+.idea/
+*.DotSettings.user
+*.DotSettings
+artifacts/
+*.nupkg
+*.snupkg
+.DS_Store
+Thumbs.db
+*.log

@@ -7,7 +7,7 @@ public class SinglyLinkedListTests
     [Fact]
     public void AddFirst_OnEmptyList_CountIsOne()
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         list.AddFirst(1);
         Assert.Equal(1, list.Count);
     }
@@ -15,7 +15,7 @@ public class SinglyLinkedListTests
     [Fact]
     public void AddFirst_MultipleElements_PrependsInOrder()
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         list.AddFirst(3);
         list.AddFirst(2);
         list.AddFirst(1);
@@ -27,7 +27,7 @@ public class SinglyLinkedListTests
     [Fact]
     public void AddLast_MultipleElements_AppendsInOrder()
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         list.AddLast(1);
         list.AddLast(2);
         list.AddLast(3);
@@ -125,7 +125,7 @@ public class SinglyLinkedListTests
     [Fact]
     public void Reverse_EmptyList_NoException()
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         list.Reverse();
         Assert.Empty(list);
     }
@@ -145,7 +145,7 @@ public class SinglyLinkedListTests
     [MemberData(nameof(SortCases))]
     public void Sort_GivenInput_ProducesAscendingOrder(int[] input, int[] expected)
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         foreach (var x in input) list.AddLast(x);
         list.Sort();
         Assert.Equal(expected, list);
@@ -164,7 +164,7 @@ public class SinglyLinkedListTests
     [Fact]
     public void Sort_EmptyList_NoException()
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         list.Sort();
         Assert.Equal(0, list.Count);
     }
@@ -174,7 +174,7 @@ public class SinglyLinkedListTests
     {
         var rng = new Random(42);
         var input = Enumerable.Range(0, 1_000).Select(_ => rng.Next(10_000)).ToArray();
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         foreach (var x in input) list.AddLast(x);
 
         list.Sort();
@@ -184,9 +184,9 @@ public class SinglyLinkedListTests
 
     // ── Helpers ─────────────────────────────────────────────────────────────
 
-    private static SinglyLinkedList<int> ListOf(params int[] values)
+    private static SortableSinglyLinkedList<int> ListOf(params int[] values)
     {
-        var list = new SinglyLinkedList<int>();
+        var list = new SortableSinglyLinkedList<int>();
         foreach (var v in values) list.AddLast(v);
         return list;
     }

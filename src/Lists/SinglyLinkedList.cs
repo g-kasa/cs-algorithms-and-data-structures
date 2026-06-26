@@ -3,23 +3,23 @@ using System.Collections;
 namespace Algorithms.Lists;
 
 /// <summary>A singly-linked list with O(1) prepend and O(n) traversal operations.</summary>
-/// <typeparam name="T">The element type; must implement <see cref="IComparable{T}"/> to support sorting.</typeparam>
+/// <typeparam name="T">The element type; must be non-nullable.</typeparam>
 /// <remarks>
-/// Time:  AddFirst O(1), AddLast O(n), Remove O(n), Contains O(n), Reverse O(n), Sort O(n²).
+/// Time:  AddFirst O(1), AddLast O(n), Remove O(n), Contains O(n), Reverse O(n).
 /// Space: O(n) for n elements; O(1) auxiliary for all operations.
 /// </remarks>
-public sealed class SinglyLinkedList<T> : IEnumerable<T> where T : IComparable<T>
+public class SinglyLinkedList<T> : IEnumerable<T> where T : notnull
 {
-    private sealed class Node(T value, Node? next = null)
+    protected sealed class Node(T value, Node? next = null)
     {
         internal T Value = value;
         internal Node? Next = next;
     }
 
-    private Node? _head;
+    protected Node? _head;
 
     /// <summary>Gets the number of elements in the list.</summary>
-    public int Count { get; private set; }
+    public int Count { get; protected set; }
 
     /// <summary>Adds <paramref name="value"/> to the front of the list.</summary>
     /// <remarks>Time: O(1).</remarks>
@@ -55,7 +55,7 @@ public sealed class SinglyLinkedList<T> : IEnumerable<T> where T : IComparable<T
     {
         if (_head is null) return false;
 
-        if (_head.Value.CompareTo(value) == 0)
+        if (EqualityComparer<T>.Default.Equals(_head.Value, value))
         {
             _head = _head.Next;
             Count--;
@@ -65,7 +65,7 @@ public sealed class SinglyLinkedList<T> : IEnumerable<T> where T : IComparable<T
         var current = _head;
         while (current.Next is not null)
         {
-            if (current.Next.Value.CompareTo(value) == 0)
+            if (EqualityComparer<T>.Default.Equals(current.Next.Value, value))
             {
                 current.Next = current.Next.Next;
                 Count--;
@@ -83,7 +83,7 @@ public sealed class SinglyLinkedList<T> : IEnumerable<T> where T : IComparable<T
         var current = _head;
         while (current is not null)
         {
-            if (current.Value.CompareTo(value) == 0) return true;
+            if (EqualityComparer<T>.Default.Equals(current.Value, value)) return true;
             current = current.Next;
         }
         return false;
@@ -103,46 +103,6 @@ public sealed class SinglyLinkedList<T> : IEnumerable<T> where T : IComparable<T
             current = next;
         }
         _head = previous;
-    }
-
-    /// <summary>Sorts the list in ascending order using insertion sort.</summary>
-    /// <remarks>
-    /// Time: O(n²) average and worst. Space: O(1) — relinks nodes, no extra allocation.
-    /// Stable: yes (equal elements preserve their original relative order).
-    /// </remarks>
-    public void Sort()
-    {
-        if (_head is null || _head.Next is null) return;
-
-        // Start with the first node as the only "sorted" segment.
-        var sorted = _head;
-        var unsorted = _head.Next;
-        sorted.Next = null;
-
-        while (unsorted is not null)
-        {
-            var next = unsorted.Next;
-
-            if (unsorted.Value.CompareTo(sorted.Value) <= 0)
-            {
-                // New node belongs at the front of the sorted segment.
-                unsorted.Next = sorted;
-                sorted = unsorted;
-            }
-            else
-            {
-                // Walk the sorted segment to find the insertion point.
-                var current = sorted;
-                while (current.Next is not null && current.Next.Value.CompareTo(unsorted.Value) < 0)
-                    current = current.Next;
-                unsorted.Next = current.Next;
-                current.Next = unsorted;
-            }
-
-            unsorted = next;
-        }
-
-        _head = sorted;
     }
 
     /// <summary>Returns an enumerator that iterates through the list from head to tail.</summary>

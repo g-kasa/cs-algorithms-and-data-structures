@@ -92,6 +92,27 @@ public sealed class BinarySearchTree<T> where T : IComparable<T>
 - Use a `private static <Type> TypeOf(params ...)` helper to keep test bodies concise
 - No mocking; all tests are pure unit tests
 
+## Branching Strategy (Gitflow)
+
+This repository follows [Gitflow](https://nvie.com/posts/a-successful-git-branching-model/).
+
+| Branch | Purpose | Created from | Merges into |
+|--------|---------|--------------|-------------|
+| `main` | Production-ready, tagged releases | — | — |
+| `develop` | Integration branch for completed work | `main` | — |
+| `feature/<topic>` | New data structure or algorithm | `develop` | `develop` via PR |
+| `release/<version>` | Release preparation (version bumps, changelog) | `develop` | `main` + `develop` via PR |
+| `hotfix/<description>` | Urgent production fixes | `main` | `main` + `develop` via PR |
+
+**Rules enforced on GitHub:**
+- `main` and `develop` are protected — no direct pushes, no force-pushes, no deletions.
+- All changes must arrive via a pull request.
+
+**Branch naming convention:**
+- `feature/` — new topic or algorithm (e.g. `feature/hash-tables`, `feature/bst-balance`)
+- `release/` — semantic version (e.g. `release/1.2.0`)
+- `hotfix/` — short description of the fix (e.g. `hotfix/fix-bst-remove`)
+
 ## Agents
 
 | Agent | When to use |

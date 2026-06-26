@@ -69,6 +69,45 @@ dotnet test tests/<Topic>.Tests                           # Run one topic's test
 dotnet test --filter "FullyQualifiedName~BinarySearchTree" # Run tests for a specific class
 ```
 
+## Contributing
+
+This project uses the [Gitflow](https://nvie.com/posts/a-successful-git-branching-model/) branching strategy.
+
+### Branches
+
+| Branch | Purpose | Created from | Merges into |
+|--------|---------|--------------|-------------|
+| `main` | Production-ready, tagged releases | — | — |
+| `develop` | Integration branch for completed work | `main` | — |
+| `feature/<topic>` | New data structure or algorithm | `develop` | `develop` |
+| `release/<version>` | Release preparation (version bumps, changelog) | `develop` | `main` + `develop` |
+| `hotfix/<description>` | Urgent production fixes | `main` | `main` + `develop` |
+
+### Workflow
+
+```bash
+# Start a feature
+git checkout develop && git pull
+git checkout -b feature/hash-tables
+
+# Finish a feature — open a PR: feature/* → develop
+
+# Cut a release
+git checkout develop && git pull
+git checkout -b release/1.2.0
+# ... bump versions, update changelog ...
+# Open PRs: release/* → main  and  release/* → develop
+
+# Emergency hotfix
+git checkout main && git pull
+git checkout -b hotfix/fix-bst-remove
+# ... fix ...
+# Open PRs: hotfix/* → main  and  hotfix/* → develop
+```
+
+> **Enforced on GitHub:** `main` and `develop` require a pull request before merging.
+> Direct pushes, force-pushes, and branch deletions are disabled on both branches.
+
 ## Development
 
 See [CLAUDE.md](CLAUDE.md) for conventions, available agents, and how to add a new data structure topic.

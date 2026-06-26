@@ -7,7 +7,7 @@ namespace Algorithms.Lists;
 /// Time:  BubbleSort O(n²), SelectionSort O(n²), InsertionSort O(n²), MergeSort O(n log n).
 /// Space: O(1) auxiliary for all sorts except MergeSort which uses O(log n) stack space.
 /// </remarks>
-public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : IComparable<T>
+public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : notnull, IComparable<T>
 {
     /// <summary>
     /// Sorts the list in ascending order using the bubble sort algorithm.

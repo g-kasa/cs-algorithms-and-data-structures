@@ -10,7 +10,7 @@ namespace Algorithms.Lists;
 /// Space: O(1) auxiliary for SelectionSort and InsertionSort.
 ///        O(log n) call-stack depth for MergeSort.
 /// </remarks>
-public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedList<T> where T : IComparable<T>
+public sealed class SortableCircularDoublyLinkedList<T> : CircularDoublyLinkedList<T> where T : notnull, IComparable<T>
 {
     /// <summary>
     /// Sorts the list in ascending order using the selection sort algorithm.

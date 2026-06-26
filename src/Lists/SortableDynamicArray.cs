@@ -24,7 +24,7 @@ namespace Algorithms.Lists;
 /// Space: O(n) for the array itself. BinarySearch/BubbleSort/SelectionSort/InsertionSort/ShellSort/HeapSort O(1) auxiliary.
 ///        MergeSort O(n) auxiliary (one extra array). QuickSort O(log n) auxiliary (recursion stack).
 /// </remarks>
-public sealed class SortableDynamicArray<T> : DynamicArray<T> where T : IComparable<T>
+public sealed class SortableDynamicArray<T> : DynamicArray<T> where T : notnull, IComparable<T>
 {
     /// <summary>
     /// Searches a sorted array for <paramref name="value"/> using binary search.

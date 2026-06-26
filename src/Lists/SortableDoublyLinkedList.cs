@@ -19,7 +19,7 @@ namespace Algorithms.Lists;
 /// Space: BubbleSort O(1) auxiliary. SelectionSort O(1) auxiliary.
 ///        InsertionSort O(1) auxiliary. MergeSort O(log n) auxiliary (recursion stack).
 /// </remarks>
-public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : IComparable<T>
+public sealed class SortableDoublyLinkedList<T> : DoublyLinkedList<T> where T : notnull, IComparable<T>
 {
     /// <summary>
     /// Sorts the list in ascending order using Bubble Sort. Adjacent nodes whose values

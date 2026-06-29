@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 public class CircularDoublyLinkedListTests
 {
@@ -9,7 +9,7 @@ public class CircularDoublyLinkedListTests
     {
         var list = new CircularDoublyLinkedList<int>();
         list.AddFirst(42);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class CircularDoublyLinkedListTests
     {
         var list = new CircularDoublyLinkedList<int>();
         list.AddLast(99);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -119,7 +119,6 @@ public class CircularDoublyLinkedListTests
         var list = ListOf(7);
         var removed = list.RemoveFirst();
         Assert.Equal(7, removed);
-        Assert.Equal(0, list.Count);
         Assert.Empty(list);
     }
 
@@ -130,7 +129,7 @@ public class CircularDoublyLinkedListTests
         var removed = list.RemoveFirst();
         Assert.Equal(1, removed);
         Assert.Equal([2], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -149,7 +148,7 @@ public class CircularDoublyLinkedListTests
         list.RemoveFirst();
         list.RemoveFirst();
         list.RemoveFirst();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -176,7 +175,7 @@ public class CircularDoublyLinkedListTests
         var list = ListOf(7);
         var removed = list.RemoveLast();
         Assert.Equal(7, removed);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -187,7 +186,7 @@ public class CircularDoublyLinkedListTests
         var removed = list.RemoveLast();
         Assert.Equal(2, removed);
         Assert.Equal([1], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -206,7 +205,7 @@ public class CircularDoublyLinkedListTests
         list.RemoveLast();
         list.RemoveLast();
         list.RemoveLast();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -239,7 +238,7 @@ public class CircularDoublyLinkedListTests
     {
         var list = ListOf(42);
         Assert.True(list.Remove(42));
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -300,19 +299,19 @@ public class CircularDoublyLinkedListTests
     [Fact]
     public void Contains_EmptyList_ReturnsFalse()
     {
-        Assert.False(new CircularDoublyLinkedList<int>().Contains(1));
+        Assert.DoesNotContain(1, new CircularDoublyLinkedList<int>());
     }
 
     [Fact]
     public void Contains_SingleElement_PresentValue_ReturnsTrue()
     {
-        Assert.True(ListOf(42).Contains(42));
+        Assert.Contains(42, ListOf(42));
     }
 
     [Fact]
     public void Contains_SingleElement_AbsentValue_ReturnsFalse()
     {
-        Assert.False(ListOf(42).Contains(0));
+        Assert.DoesNotContain(0, ListOf(42));
     }
 
     [Theory]
@@ -331,7 +330,7 @@ public class CircularDoublyLinkedListTests
     public void Contains_DuplicateElements_ReturnsTrue()
     {
         var list = ListOf(7, 7, 7);
-        Assert.True(list.Contains(7));
+        Assert.Contains(7, list);
     }
 
     [Fact]
@@ -339,16 +338,16 @@ public class CircularDoublyLinkedListTests
     {
         var list = ListOf(1, 2, 3);
         list.Remove(2);
-        Assert.False(list.Contains(2));
+        Assert.DoesNotContain(2, list);
     }
 
     [Fact]
     public void Contains_BoundaryValues_IntMinAndMax()
     {
         var list = ListOf(int.MinValue, 0, int.MaxValue);
-        Assert.True(list.Contains(int.MinValue));
-        Assert.True(list.Contains(int.MaxValue));
-        Assert.False(list.Contains(1));
+        Assert.Contains(int.MinValue, list);
+        Assert.Contains(int.MaxValue, list);
+        Assert.DoesNotContain(1, list);
     }
 
     // ── Rotate ──────────────────────────────────────────────────────────────
@@ -358,7 +357,7 @@ public class CircularDoublyLinkedListTests
     {
         var list = new CircularDoublyLinkedList<int>();
         list.Rotate(3);  // must not throw
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -367,7 +366,7 @@ public class CircularDoublyLinkedListTests
         var list = ListOf(1);
         list.Rotate(1);
         Assert.Equal([1], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -507,7 +506,7 @@ public class CircularDoublyLinkedListTests
     [Fact]
     public void Count_NewList_IsZero()
     {
-        Assert.Equal(0, new CircularDoublyLinkedList<int>().Count);
+        Assert.Empty(new CircularDoublyLinkedList<int>());
     }
 
     [Fact]
@@ -515,7 +514,7 @@ public class CircularDoublyLinkedListTests
     {
         var list = new CircularDoublyLinkedList<int>();
         list.AddFirst(1);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
         list.AddFirst(2);
         Assert.Equal(2, list.Count);
     }
@@ -525,7 +524,7 @@ public class CircularDoublyLinkedListTests
     {
         var list = new CircularDoublyLinkedList<int>();
         list.AddLast(1);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
         list.AddLast(2);
         Assert.Equal(2, list.Count);
     }
@@ -678,7 +677,7 @@ public class CircularDoublyLinkedListTests
         var list = new CircularDoublyLinkedList<int>();
         for (int i = 0; i < n; i++) list.AddLast(i);
         for (int i = 0; i < n; i++) Assert.Equal(i, list.RemoveFirst());
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -689,7 +688,7 @@ public class CircularDoublyLinkedListTests
         var list = new CircularDoublyLinkedList<int>();
         for (int i = 0; i < n; i++) list.AddLast(i);
         for (int i = n - 1; i >= 0; i--) Assert.Equal(i, list.RemoveLast());
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -698,9 +697,9 @@ public class CircularDoublyLinkedListTests
         const int n = 1_000;
         var list = new CircularDoublyLinkedList<int>();
         for (int i = 0; i < n; i++) list.AddLast(i);
-        for (int i = 0; i < n; i++) Assert.True(list.Contains(i));
-        Assert.False(list.Contains(n));
-        Assert.False(list.Contains(-1));
+        for (int i = 0; i < n; i++) Assert.Contains(i, list);
+        Assert.DoesNotContain(n, list);
+        Assert.DoesNotContain(-1, list);
     }
 
     [Fact]

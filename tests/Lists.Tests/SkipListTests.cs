@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 public class SkipListTests
 {
@@ -8,7 +8,7 @@ public class SkipListTests
     public void Count_EmptyList_IsZero()
     {
         var list = new SkipList<int>();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class SkipListTests
     [Fact]
     public void Contains_EmptyList_ReturnsFalse()
     {
-        Assert.False(new SkipList<int>().Contains(42));
+        Assert.DoesNotContain(42, new SkipList<int>());
     }
 
     [Theory]
@@ -39,14 +39,14 @@ public class SkipListTests
     {
         var list = new SkipList<int>();
         list.Insert(value);
-        Assert.True(list.Contains(value));
+        Assert.Contains(value, list);
     }
 
     [Fact]
     public void Contains_ValueNotInserted_ReturnsFalse()
     {
         var list = SkipListOf(1, 2, 3);
-        Assert.False(list.Contains(99));
+        Assert.DoesNotContain(99, list);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class SkipListTests
         var list = new SkipList<int>();
         list.Insert(7);
         list.Remove(7);
-        Assert.False(list.Contains(7));
+        Assert.DoesNotContain(7, list);
     }
 
     // ── Insert ──────────────────────────────────────────────────────────────
@@ -65,7 +65,7 @@ public class SkipListTests
     {
         var list = new SkipList<int>();
         list.Insert(42);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -74,8 +74,8 @@ public class SkipListTests
         var list = new SkipList<int>();
         list.Insert(1);
         list.Insert(2);
-        Assert.True(list.Contains(1));
-        Assert.True(list.Contains(2));
+        Assert.Contains(1, list);
+        Assert.Contains(2, list);
         Assert.Equal(2, list.Count);
     }
 
@@ -85,7 +85,7 @@ public class SkipListTests
     {
         var list = new SkipList<int>();
         foreach (var v in values) list.Insert(v);
-        foreach (var v in values) Assert.True(list.Contains(v));
+        foreach (var v in values) Assert.Contains(v, list);
     }
 
     public static IEnumerable<object[]> InsertOrderCases =>
@@ -102,7 +102,7 @@ public class SkipListTests
         var list = new SkipList<int>();
         for (int i = 0; i < 5; i++) list.Insert(7);
         Assert.Equal(5, list.Count);
-        Assert.True(list.Contains(7));
+        Assert.Contains(7, list);
     }
 
     [Fact]
@@ -111,8 +111,8 @@ public class SkipListTests
         var list = new SkipList<int>();
         list.Insert(int.MinValue);
         list.Insert(int.MaxValue);
-        Assert.True(list.Contains(int.MinValue));
-        Assert.True(list.Contains(int.MaxValue));
+        Assert.Contains(int.MinValue, list);
+        Assert.Contains(int.MaxValue, list);
         Assert.Equal(2, list.Count);
     }
 
@@ -146,8 +146,8 @@ public class SkipListTests
         var list = new SkipList<int>();
         list.Insert(42);
         Assert.True(list.Remove(42));
-        Assert.Equal(0, list.Count);
-        Assert.False(list.Contains(42));
+        Assert.Empty(list);
+        Assert.DoesNotContain(42, list);
     }
 
     [Fact]
@@ -157,9 +157,9 @@ public class SkipListTests
         list.Insert(1);
         list.Insert(2);
         Assert.True(list.Remove(1));
-        Assert.False(list.Contains(1));
-        Assert.True(list.Contains(2));
-        Assert.Equal(1, list.Count);
+        Assert.DoesNotContain(1, list);
+        Assert.Contains(2, list);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -169,9 +169,9 @@ public class SkipListTests
         list.Insert(1);
         list.Insert(2);
         Assert.True(list.Remove(2));
-        Assert.False(list.Contains(2));
-        Assert.True(list.Contains(1));
-        Assert.Equal(1, list.Count);
+        Assert.DoesNotContain(2, list);
+        Assert.Contains(1, list);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -179,9 +179,9 @@ public class SkipListTests
     {
         var list = SkipListOf(10, 20, 30);
         Assert.True(list.Remove(20));
-        Assert.False(list.Contains(20));
-        Assert.True(list.Contains(10));
-        Assert.True(list.Contains(30));
+        Assert.DoesNotContain(20, list);
+        Assert.Contains(10, list);
+        Assert.Contains(30, list);
         Assert.Equal(2, list.Count);
     }
 
@@ -195,8 +195,8 @@ public class SkipListTests
         list.Insert(5);
 
         Assert.True(list.Remove(5));
-        Assert.Equal(1, list.Count);
-        Assert.True(list.Contains(5)); // one copy remains
+        Assert.Single(list);
+        Assert.Contains(5, list); // one copy remains
     }
 
     [Fact]
@@ -208,8 +208,8 @@ public class SkipListTests
 
         Assert.True(list.Remove(5));
         Assert.True(list.Remove(5));
-        Assert.Equal(0, list.Count);
-        Assert.False(list.Contains(5));
+        Assert.Empty(list);
+        Assert.DoesNotContain(5, list);
     }
 
     [Fact]
@@ -222,7 +222,7 @@ public class SkipListTests
         list.Remove(5);
         list.Remove(5);
         Assert.False(list.Remove(5));
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -247,8 +247,8 @@ public class SkipListTests
 
         foreach (var v in values) list.Remove(v);
 
-        Assert.Equal(0, list.Count);
-        foreach (var v in values) Assert.False(list.Contains(v));
+        Assert.Empty(list);
+        foreach (var v in values) Assert.DoesNotContain(v, list);
     }
 
     [Fact]
@@ -385,7 +385,7 @@ public class SkipListTests
         var list = new SkipList<int>();
         foreach (var v in values) list.Insert(v);
 
-        foreach (var v in values) Assert.True(list.Contains(v));
+        foreach (var v in values) Assert.Contains(v, list);
     }
 
     [Fact]

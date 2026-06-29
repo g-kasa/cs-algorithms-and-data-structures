@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 public class DoublyLinkedListTests
 {
@@ -8,7 +8,7 @@ public class DoublyLinkedListTests
     public void Count_NewList_IsZero()
     {
         var list = new SortableDoublyLinkedList<int>();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     // ── AddFirst ────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ public class DoublyLinkedListTests
     {
         var list = new SortableDoublyLinkedList<int>();
         list.AddFirst(1);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class DoublyLinkedListTests
     {
         var list = new SortableDoublyLinkedList<int>();
         list.AddLast(1);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -123,7 +123,6 @@ public class DoublyLinkedListTests
         var list = ListOf(42);
         var removed = list.RemoveFirst();
         Assert.Equal(42, removed);
-        Assert.Equal(0, list.Count);
         Assert.Empty(list);
     }
 
@@ -157,7 +156,7 @@ public class DoublyLinkedListTests
         var list = ListOf(1, 2);
         list.RemoveFirst();
         Assert.Equal([2], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -167,7 +166,7 @@ public class DoublyLinkedListTests
         list.RemoveFirst();
         list.RemoveFirst();
         list.RemoveFirst();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -194,7 +193,7 @@ public class DoublyLinkedListTests
         var list = ListOf(42);
         var removed = list.RemoveLast();
         Assert.Equal(42, removed);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -228,7 +227,7 @@ public class DoublyLinkedListTests
         var list = ListOf(1, 2);
         list.RemoveLast();
         Assert.Equal([1], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -238,7 +237,7 @@ public class DoublyLinkedListTests
         list.RemoveLast();
         list.RemoveLast();
         list.RemoveLast();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -256,7 +255,7 @@ public class DoublyLinkedListTests
         var list = ListOf(1, 2);
         list.RemoveFirst();
         list.RemoveLast();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -288,7 +287,7 @@ public class DoublyLinkedListTests
     {
         var list = ListOf(42);
         Assert.True(list.Remove(42));
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -334,7 +333,7 @@ public class DoublyLinkedListTests
         var list = ListOf(1, 2);
         Assert.True(list.Remove(1));
         Assert.Equal([2], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -343,7 +342,7 @@ public class DoublyLinkedListTests
         var list = ListOf(1, 2);
         Assert.True(list.Remove(2));
         Assert.Equal([1], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     // ── Contains ────────────────────────────────────────────────────────────
@@ -351,7 +350,7 @@ public class DoublyLinkedListTests
     [Fact]
     public void Contains_EmptyList_ReturnsFalse()
     {
-        Assert.False(new DoublyLinkedList<int>().Contains(1));
+        Assert.DoesNotContain(1, new DoublyLinkedList<int>());
     }
 
     [Theory]
@@ -360,31 +359,31 @@ public class DoublyLinkedListTests
     [InlineData(3)]
     public void Contains_ExistingElement_ReturnsTrue(int value)
     {
-        Assert.True(ListOf(1, 2, 3).Contains(value));
+        Assert.Contains(value, ListOf(1, 2, 3));
     }
 
     [Fact]
     public void Contains_MissingElement_ReturnsFalse()
     {
-        Assert.False(ListOf(1, 2, 3).Contains(99));
+        Assert.DoesNotContain(99, ListOf(1, 2, 3));
     }
 
     [Fact]
     public void Contains_SingleElement_Present_ReturnsTrue()
     {
-        Assert.True(ListOf(7).Contains(7));
+        Assert.Contains(7, ListOf(7));
     }
 
     [Fact]
     public void Contains_SingleElement_Absent_ReturnsFalse()
     {
-        Assert.False(ListOf(7).Contains(8));
+        Assert.DoesNotContain(8, ListOf(7));
     }
 
     [Fact]
     public void Contains_DuplicateValues_ReturnsTrue()
     {
-        Assert.True(ListOf(4, 4, 4).Contains(4));
+        Assert.Contains(4, ListOf(4, 4, 4));
     }
 
     [Fact]
@@ -392,7 +391,7 @@ public class DoublyLinkedListTests
     {
         var list = ListOf(1, 2, 3);
         list.Remove(2);
-        Assert.False(list.Contains(2));
+        Assert.DoesNotContain(2, list);
     }
 
     [Fact]
@@ -401,8 +400,8 @@ public class DoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.AddLast(int.MinValue);
         list.AddLast(int.MaxValue);
-        Assert.True(list.Contains(int.MinValue));
-        Assert.True(list.Contains(int.MaxValue));
+        Assert.Contains(int.MinValue, list);
+        Assert.Contains(int.MaxValue, list);
     }
 
     // ── Reverse ─────────────────────────────────────────────────────────────
@@ -413,7 +412,7 @@ public class DoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.Reverse();
         Assert.Empty(list);
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]
@@ -422,7 +421,7 @@ public class DoublyLinkedListTests
         var list = ListOf(42);
         list.Reverse();
         Assert.Equal([42], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -513,7 +512,7 @@ public class DoublyLinkedListTests
     {
         var list = new SortableDoublyLinkedList<int>();
         list.Sort();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -657,13 +656,13 @@ public class DoublyLinkedListTests
         list.AddFirst(1);
         list.AddLast(3);
         Assert.Equal(3, list.Count);
-        Assert.True(list.Contains(1));
-        Assert.True(list.Contains(2));
-        Assert.True(list.Contains(3));
+        Assert.Contains(1, list);
+        Assert.Contains(2, list);
+        Assert.Contains(3, list);
 
         list.Remove(2);
         Assert.Equal(2, list.Count);
-        Assert.False(list.Contains(2));
+        Assert.DoesNotContain(2, list);
         Assert.Equal([1, 3], list);
     }
 
@@ -676,7 +675,7 @@ public class DoublyLinkedListTests
         Assert.Equal(2, list.RemoveFirst());
         Assert.Equal(4, list.RemoveLast());
         Assert.Equal([3], list);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -719,7 +718,7 @@ public class DoublyLinkedListTests
 
         for (var i = 0; i < n; i++) list.RemoveFirst();
 
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -732,7 +731,7 @@ public class DoublyLinkedListTests
 
         for (var i = 0; i < n; i++) list.RemoveLast();
 
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
         Assert.Empty(list);
     }
 
@@ -756,9 +755,9 @@ public class DoublyLinkedListTests
         list.AddLast(int.MaxValue);
         for (var i = 1; i < 999; i++) list.AddLast(i);
 
-        Assert.True(list.Contains(int.MinValue));
-        Assert.True(list.Contains(int.MaxValue));
-        Assert.False(list.Contains(int.MaxValue - 1));  // not inserted
+        Assert.Contains(int.MinValue, list);
+        Assert.Contains(int.MaxValue, list);
+        Assert.DoesNotContain(int.MaxValue - 1, list);  // not inserted
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────

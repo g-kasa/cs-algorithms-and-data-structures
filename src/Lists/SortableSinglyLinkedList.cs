@@ -4,6 +4,7 @@ namespace Algorithms.Lists;
 /// <typeparam name="T">Element type; must implement <see cref="IComparable{T}"/>.</typeparam>
 /// <remarks>
 /// Inherits all O(1)/O(n) operations from <see cref="SinglyLinkedList{T}"/>.
+/// All sort methods are thread-safe and serialise through the inherited monitor lock.
 /// Time:  BubbleSort O(n²), SelectionSort O(n²), InsertionSort O(n²), MergeSort O(n log n).
 /// Space: O(1) auxiliary for all sorts except MergeSort which uses O(log n) stack space.
 /// </remarks>
@@ -16,24 +17,27 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
     /// <remarks>Time: O(n²) average and worst. O(n) best when already sorted. Space: O(1).</remarks>
     public void BubbleSort()
     {
-        if (_head is null || _head.Next is null) return;
-
-        bool swapped;
-        do
+        lock (_syncRoot)
         {
-            swapped = false;
-            var current = _head;
-            while (current.Next is not null)
+            if (_head is null || _head.Next is null) return;
+
+            bool swapped;
+            do
             {
-                if (current.Value.CompareTo(current.Next.Value) > 0)
+                swapped = false;
+                var current = _head;
+                while (current.Next is not null)
                 {
-                    (current.Value, current.Next.Value) = (current.Next.Value, current.Value);
-                    swapped = true;
+                    if (current.Value.CompareTo(current.Next.Value) > 0)
+                    {
+                        (current.Value, current.Next.Value) = (current.Next.Value, current.Value);
+                        swapped = true;
+                    }
+                    current = current.Next;
                 }
-                current = current.Next;
             }
+            while (swapped);
         }
-        while (swapped);
     }
 
     /// <summary>
@@ -43,22 +47,25 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
     /// <remarks>Time: O(n²). Space: O(1).</remarks>
     public void SelectionSort()
     {
-        var position = _head;
-        while (position is not null)
+        lock (_syncRoot)
         {
-            var minimumNode = position;
-            var candidate = position.Next;
-            while (candidate is not null)
+            var position = _head;
+            while (position is not null)
             {
-                if (candidate.Value.CompareTo(minimumNode.Value) < 0)
-                    minimumNode = candidate;
-                candidate = candidate.Next;
+                var minimumNode = position;
+                var candidate = position.Next;
+                while (candidate is not null)
+                {
+                    if (candidate.Value.CompareTo(minimumNode.Value) < 0)
+                        minimumNode = candidate;
+                    candidate = candidate.Next;
+                }
+
+                if (!ReferenceEquals(minimumNode, position))
+                    (position.Value, minimumNode.Value) = (minimumNode.Value, position.Value);
+
+                position = position.Next;
             }
-
-            if (!ReferenceEquals(minimumNode, position))
-                (position.Value, minimumNode.Value) = (minimumNode.Value, position.Value);
-
-            position = position.Next;
         }
     }
 
@@ -69,38 +76,38 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
     /// <remarks>Time: O(n²) average and worst. O(n) best when already sorted. Space: O(1).</remarks>
     public void InsertionSort()
     {
-        if (_head is null || _head.Next is null) return;
-
-        // The sorted prefix starts with just the first node.
-        var sorted = _head;
-        var unsorted = _head.Next;
-        sorted.Next = null;
-
-        while (unsorted is not null)
+        lock (_syncRoot)
         {
-            var next = unsorted.Next;
+            if (_head is null || _head.Next is null) return;
 
-            if (unsorted.Value.CompareTo(sorted.Value) <= 0)
+            var sorted = _head;
+            var unsorted = _head.Next;
+            sorted.Next = null;
+
+            while (unsorted is not null)
             {
-                // The unsorted node belongs before everything in the sorted prefix.
-                unsorted.Next = sorted;
-                sorted = unsorted;
-            }
-            else
-            {
-                // Walk the sorted prefix to find the last node whose value is <= unsorted.Value.
-                var walker = sorted;
-                while (walker.Next is not null && walker.Next.Value.CompareTo(unsorted.Value) <= 0)
-                    walker = walker.Next;
+                var next = unsorted.Next;
 
-                unsorted.Next = walker.Next;
-                walker.Next = unsorted;
+                if (unsorted.Value.CompareTo(sorted.Value) <= 0)
+                {
+                    unsorted.Next = sorted;
+                    sorted = unsorted;
+                }
+                else
+                {
+                    var walker = sorted;
+                    while (walker.Next is not null && walker.Next.Value.CompareTo(unsorted.Value) <= 0)
+                        walker = walker.Next;
+
+                    unsorted.Next = walker.Next;
+                    walker.Next = unsorted;
+                }
+
+                unsorted = next;
             }
 
-            unsorted = next;
+            _head = sorted;
         }
-
-        _head = sorted;
     }
 
     /// <summary>
@@ -110,9 +117,11 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
     /// <remarks>Time: O(n log n). Space: O(log n) call-stack depth.</remarks>
     public void MergeSort()
     {
-        if (_head is null || _head.Next is null) return;
-
-        _head = MergeSortCore(_head);
+        lock (_syncRoot)
+        {
+            if (_head is null || _head.Next is null) return;
+            _head = MergeSortCore(_head);
+        }
     }
 
     /// <summary>Sorts the list in ascending order. Delegates to <see cref="MergeSort"/>.</summary>
@@ -126,7 +135,7 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
 
         var middle = FindMiddle(head);
         var rightHead = middle.Next!;
-        middle.Next = null; // sever the two halves
+        middle.Next = null;
 
         var sortedLeft = MergeSortCore(head);
         var sortedRight = MergeSortCore(rightHead);
@@ -135,7 +144,6 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
     }
 
     // Returns the last node of the first half using the slow/fast pointer technique.
-    // When fast reaches the end, slow is at the midpoint.
     private static Node FindMiddle(Node head)
     {
         var slow = head;
@@ -153,7 +161,6 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
     // Merges two sorted chains into one sorted chain by relinking Next pointers.
     private static Node Merge(Node left, Node right)
     {
-        // A sentinel node avoids a special case for the very first comparison.
         var sentinel = new Node(default!);
         var tail = sentinel;
 
@@ -161,7 +168,6 @@ public sealed class SortableSinglyLinkedList<T> : SinglyLinkedList<T> where T : 
         {
             if (left.Value.CompareTo(right.Value) <= 0)
             {
-                // Advance tail before checking exhaustion, or the sentinel gets overwritten.
                 tail.Next = left;
                 tail = left;
                 left = left.Next!;

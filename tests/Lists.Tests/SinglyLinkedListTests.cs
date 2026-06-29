@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 public class SinglyLinkedListTests
 {
@@ -9,7 +9,7 @@ public class SinglyLinkedListTests
     {
         var list = new SortableSinglyLinkedList<int>();
         list.AddFirst(1);
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
     }
 
     [Fact]
@@ -80,7 +80,6 @@ public class SinglyLinkedListTests
     {
         var list = ListOf(42);
         Assert.True(list.Remove(42));
-        Assert.Equal(0, list.Count);
         Assert.Empty(list);
     }
 
@@ -89,19 +88,19 @@ public class SinglyLinkedListTests
     [Fact]
     public void Contains_ExistingElement_ReturnsTrue()
     {
-        Assert.True(ListOf(1, 2, 3).Contains(2));
+        Assert.Contains(2, ListOf(1, 2, 3));
     }
 
     [Fact]
     public void Contains_MissingElement_ReturnsFalse()
     {
-        Assert.False(ListOf(1, 2, 3).Contains(99));
+        Assert.DoesNotContain(99, ListOf(1, 2, 3));
     }
 
     [Fact]
     public void Contains_EmptyList_ReturnsFalse()
     {
-        Assert.False(new SinglyLinkedList<int>().Contains(1));
+        Assert.DoesNotContain(1, new SinglyLinkedList<int>());
     }
 
     // ── Reverse ─────────────────────────────────────────────────────────────
@@ -166,7 +165,7 @@ public class SinglyLinkedListTests
     {
         var list = new SortableSinglyLinkedList<int>();
         list.Sort();
-        Assert.Equal(0, list.Count);
+        Assert.Empty(list);
     }
 
     [Fact]

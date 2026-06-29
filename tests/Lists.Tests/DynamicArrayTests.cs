@@ -1,4 +1,4 @@
-namespace Algorithms.Lists.Tests;
+﻿namespace Algorithms.Lists.Tests;
 
 public class DynamicArrayTests
 {
@@ -8,7 +8,7 @@ public class DynamicArrayTests
     public void Count_NewArray_IsZero()
     {
         var arr = new SortableDynamicArray<int>();
-        Assert.Equal(0, arr.Count);
+        Assert.Empty(arr);
     }
 
     [Fact]
@@ -25,7 +25,7 @@ public class DynamicArrayTests
     {
         var arr = new SortableDynamicArray<int>();
         arr.Add(42);
-        Assert.Equal(1, arr.Count);
+        Assert.Single(arr);
         Assert.Equal(42, arr[0]);
     }
 
@@ -176,7 +176,7 @@ public class DynamicArrayTests
     {
         var arr = new SortableDynamicArray<int>();
         arr.Insert(0, 42);
-        Assert.Equal(1, arr.Count);
+        Assert.Single(arr);
         Assert.Equal(42, arr[0]);
     }
 
@@ -241,7 +241,7 @@ public class DynamicArrayTests
     {
         var arr = ArrayOf(42);
         arr.RemoveAt(0);
-        Assert.Equal(0, arr.Count);
+        Assert.Empty(arr);
         Assert.Empty(arr);
     }
 
@@ -305,7 +305,7 @@ public class DynamicArrayTests
     {
         var arr = ArrayOf(7);
         Assert.True(arr.Remove(7));
-        Assert.Equal(0, arr.Count);
+        Assert.Empty(arr);
         Assert.Empty(arr);
     }
 
@@ -330,7 +330,7 @@ public class DynamicArrayTests
     [Fact]
     public void Contains_EmptyArray_ReturnsFalse()
     {
-        Assert.False(new DynamicArray<int>().Contains(1));
+        Assert.DoesNotContain(1, new DynamicArray<int>());
     }
 
     [Theory]
@@ -436,7 +436,7 @@ public class DynamicArrayTests
     {
         var arr = new SortableDynamicArray<int>();
         arr.Sort(); // must not throw
-        Assert.Equal(0, arr.Count);
+        Assert.Empty(arr);
     }
 
     [Fact]
@@ -514,7 +514,7 @@ public class DynamicArrayTests
     {
         var arr = new SortableDynamicArray<int>();
         arr.Rotate(3); // must not throw
-        Assert.Equal(0, arr.Count);
+        Assert.Empty(arr);
     }
 
     [Fact]
@@ -660,7 +660,7 @@ public class DynamicArrayTests
 
         arr.Remove(5);
         Assert.Equal(9, arr.Count);
-        Assert.False(arr.Contains(5));
+        Assert.DoesNotContain(5, arr);
         // BinarySearch result for 5 is now undefined but it should be -1 since 5 is gone.
         Assert.Equal(-1, arr.BinarySearch(5));
     }

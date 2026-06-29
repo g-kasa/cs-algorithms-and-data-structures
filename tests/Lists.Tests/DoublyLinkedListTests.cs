@@ -124,7 +124,6 @@ public class DoublyLinkedListTests
         var removed = list.RemoveFirst();
         Assert.Equal(42, removed);
         Assert.Empty(list);
-        Assert.Empty(list);
     }
 
     [Fact]

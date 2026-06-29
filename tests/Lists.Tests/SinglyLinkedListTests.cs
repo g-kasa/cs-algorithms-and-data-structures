@@ -81,7 +81,6 @@ public class SinglyLinkedListTests
         var list = ListOf(42);
         Assert.True(list.Remove(42));
         Assert.Empty(list);
-        Assert.Empty(list);
     }
 
     // ── Contains ────────────────────────────────────────────────────────────

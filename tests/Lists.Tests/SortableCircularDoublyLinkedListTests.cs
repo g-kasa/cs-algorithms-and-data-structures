@@ -357,7 +357,6 @@ public class SortableCircularDoublyLinkedListTests
         var list = new SortableCircularDoublyLinkedList<int>();
         list.MergeSort();
         Assert.Empty(list);
-        Assert.Empty(list);
     }
 
     [Fact]

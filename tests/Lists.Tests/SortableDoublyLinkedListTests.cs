@@ -73,7 +73,6 @@ public class SortableDoublyLinkedListTests
         var list = new SortableDoublyLinkedList<int>();
         list.BubbleSort();
         Assert.Empty(list);
-        Assert.Empty(list);
     }
 
     [Fact]

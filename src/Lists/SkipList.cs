@@ -119,12 +119,17 @@ public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
                     current = current.Forward[level]!;
             }
             var candidate = current.Forward[0];
-            return candidate is not null && candidate.Value.CompareTo(value) == 0;
+            while (candidate is not null && candidate.Value.CompareTo(value) == 0)
+            {
+                if (EqualityComparer<T>.Default.Equals(candidate.Value, value)) return true;
+                candidate = candidate.Forward[0];
+            }
+            return false;
         }
     }
 
     /// <summary>Returns the zero-based index of the first occurrence of <paramref name="item"/> in level-0 order, or -1 if not found.</summary>
-    /// <remarks>Time: O(n) — must count along the level-0 chain.</remarks>
+    /// <remarks>Time: O(n) — must count along the level-0 chain; exits early once values exceed <paramref name="item"/>.</remarks>
     public int IndexOf(T item)
     {
         lock (_syncRoot)
@@ -133,7 +138,9 @@ public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
             var current = _header.Forward[0];
             while (current is not null)
             {
-                if (EqualityComparer<T>.Default.Equals(current.Value, item)) return index;
+                int cmp = current.Value.CompareTo(item);
+                if (cmp > 0) break;
+                if (cmp == 0 && EqualityComparer<T>.Default.Equals(current.Value, item)) return index;
                 current = current.Forward[0];
                 index++;
             }
@@ -193,15 +200,30 @@ public sealed class SkipList<T> : IList<T> where T : notnull, IComparable<T>
     {
         lock (_syncRoot)
         {
+            // Navigate to the first CompareTo==0 position, then walk forward to find the Equals match.
             var update = BuildUpdateArray(value);
             var target = update[0].Forward[0];
+            while (target is not null && target.Value.CompareTo(value) == 0)
+            {
+                if (EqualityComparer<T>.Default.Equals(target.Value, value)) break;
+                target = target.Forward[0];
+            }
 
             if (target is null || target.Value.CompareTo(value) != 0)
                 return false;
 
+            // Rebuild predecessor links for the exact target node at each level.
+            for (int level = 0; level < MaxLevels; level++)
+            {
+                var walker = _header;
+                while (walker.Forward[level] is not null && !ReferenceEquals(walker.Forward[level], target))
+                    walker = walker.Forward[level]!;
+                update[level] = walker;
+            }
+
             for (int level = 0; level < _currentLevel; level++)
             {
-                if (update[level].Forward[level] != target) break;
+                if (!ReferenceEquals(update[level].Forward[level], target)) break;
                 update[level].Forward[level] = target.Forward[level];
             }
 

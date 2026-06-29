@@ -120,7 +120,6 @@ public class CircularDoublyLinkedListTests
         var removed = list.RemoveFirst();
         Assert.Equal(7, removed);
         Assert.Empty(list);
-        Assert.Empty(list);
     }
 
     [Fact]
